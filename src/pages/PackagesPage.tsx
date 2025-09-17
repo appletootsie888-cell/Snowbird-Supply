@@ -44,7 +44,7 @@ const PackagesPage = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors"
             >
               {categories.map(category => (
                 <option key={category.value} value={category.value}>
@@ -57,7 +57,7 @@ const PackagesPage = () => {
           {itemCount > 0 && (
             <button
               onClick={() => navigate('/scheduler')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center space-x-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-200 ease-in-out hover:scale-103 active:scale-97 flex items-center space-x-2"
             >
               <ShoppingCart className="h-5 w-5" />
               <span>Continue with {itemCount} item{itemCount !== 1 ? 's' : ''}</span>
@@ -77,15 +77,15 @@ const PackagesPage = () => {
               <Package className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No packages found</h3>
-            <p className="text-gray-600">Try selecting a different category.</p>
+            <p className="text-gray-600">Try selecting a different category or browse all packages.</p>
           </div>
         )}
 
         {itemCount > 0 && (
-          <div className="fixed bottom-6 right-6">
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-lg z-50 lg:static lg:p-0 lg:bg-transparent lg:shadow-none lg:z-auto">
             <button
               onClick={() => navigate('/checkout')}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full shadow-lg transition-colors flex items-center space-x-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full shadow-lg transition-all duration-200 ease-in-out hover:scale-103 active:scale-97 flex items-center justify-center space-x-2"
             >
               <ShoppingCart className="h-5 w-5" />
               <span>View Cart ({itemCount})</span>
