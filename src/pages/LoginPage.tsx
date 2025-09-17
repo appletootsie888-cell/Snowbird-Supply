@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast'; // Import toast
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -25,11 +26,14 @@ const LoginPage = () => {
 
       if (error) {
         setError(error.message);
+        toast.error(error.message); // Show error toast
       } else {
+        toast.success(isLogin ? 'Signed in successfully!' : 'Account created!'); // Show success toast
         navigate('/planner');
       }
     } catch (err) {
       setError('An unexpected error occurred');
+      toast.error('An unexpected error occurred'); // Show unexpected error toast
     } finally {
       setLoading(false);
     }
@@ -40,9 +44,8 @@ const LoginPage = () => {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-6">
-            <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SS</span>
-            </div>
+            {/* Placeholder Logo */}
+            <img src="/vite.svg" alt="Snowbird Supply & Sync Logo" className="h-12 w-12" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Snowbird Supply</h1>
               <p className="text-blue-600 font-medium">& Sync</p>
