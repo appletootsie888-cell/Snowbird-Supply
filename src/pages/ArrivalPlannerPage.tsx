@@ -37,12 +37,25 @@ const ArrivalPlannerPage = () => {
     try {
       const arrivalPlan: Omit<ArrivalPlan, 'id' | 'createdAt'> = {
         userId: user.id,
-        ...formData
+        arrivalDate: formData.arrivalDate,
+        departureDate: formData.departureDate,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode
       };
 
       const { error } = await supabase
         .from('arrival_plans')
-        .upsert(arrivalPlan, { onConflict: 'userId' });
+        .upsert({
+          user_id: arrivalPlan.userId,
+          arrival_date: arrivalPlan.arrivalDate,
+          departure_date: arrivalPlan.departureDate,
+          address: arrivalPlan.address,
+          city: arrivalPlan.city,
+          state: arrivalPlan.state,
+          zip_code: arrivalPlan.zipCode
+        }, { onConflict: 'user_id' });
 
       if (error) {
         setError(error.message);
