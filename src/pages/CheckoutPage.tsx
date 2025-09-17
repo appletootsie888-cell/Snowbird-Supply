@@ -4,48 +4,60 @@ import { ShoppingCart, Minus, Plus, Trash2, CreditCard } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { SupabaseOrderInsert } from '../types';
 
 const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
-  const { items, total, updateQuantity, removeItem, clearCart } = useCart();
+  const [error, setError] = useState('');
+  const { items, total, updateQuantity, removeItem, clearCart, deliveryMethod, selectedTimeSlot } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const deliveryFee = 9.99; // Mock delivery fee
+  const deliveryFee = deliveryMethod === 'delivery' ? 9.99 : 0;
   const tax = total * 0.07; // 7% tax
   const finalTotal = total + deliveryFee + tax;
 
   const handlePlaceOrder = async () => {
-    if (!user || items.length === 0) return;
+    if (!user || items.length === 0 || !selectedTimeSlot) return;
 
     setLoading(true);
+    setError('');
     
     try {
-      // Mock order creation - in real app, this would save to Supabase
-      const mockOrder = {
-        userId: user.id,
-        items: items,
-        deliveryMethod: 'pickup' as const,
-        timeSlot: {
-          id: 'mock-slot',
-          time: '10:00 AM - 11:00 AM',
-          available: true,
-          date: '2025-01-28'
-        },
-        total: finalTotal,
-        status: 'confirmed' as const
+      // Prepare order data for Supabase insertion
+      const orderToInsert: SupabaseOrderInsert = {
+        user_id: user.id,
+        packages: items.map(item => ({
+          packageId: item.packageId,
+          name: item.package.name,
+          price: item.package.price,
+          quantity: item.quantity
+        })),
+        delivery_type: deliveryMethod,
+        time_slot: selectedTimeSlot.time,
+        total_amount: parseFloat(finalTotal.toFixed(2)),
+        status: 'confirmed'
       };
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Insert order into Supabase
+      const { data, error: insertError } = await supabase
+        .from('orders')
+        .insert(orderToInsert)
+        .select('id')
+        .single();
+
+      if (insertError) {
+        throw insertError;
+      }
       
       // Clear cart and navigate to success
       clearCart();
       navigate('/success', { 
-        state: { orderId: 'ORD-' + Date.now().toString().slice(-6) }
+        state: { orderId: data.id }
       });
     } catch (error) {
       console.error('Error placing order:', error);
+      setError('Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -144,7 +156,9 @@ const CheckoutPage = () => {
                   <span className="font-medium">${total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Fee</span>
+                  <span className="text-gray-600">
+                    {deliveryMethod === 'delivery' ? 'Delivery Fee' : 'Pickup Fee'}
+                  </span>
                   <span className="font-medium">${deliveryFee.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -161,17 +175,25 @@ const CheckoutPage = () => {
 
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-900 mb-2">Pickup Details</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">
+                    {deliveryMethod === 'pickup' ? 'Pickup Details' : 'Delivery Details'}
+                  </h3>
                   <div className="text-sm text-blue-800 space-y-1">
-                    <p><strong>Date:</strong> Tomorrow</p>
-                    <p><strong>Time:</strong> 10:00 AM - 11:00 AM</p>
-                    <p><strong>Location:</strong> Walmart Estero</p>
+                    <p><strong>Date:</strong> {selectedTimeSlot?.date || 'Not selected'}</p>
+                    <p><strong>Time:</strong> {selectedTimeSlot?.time || 'Not selected'}</p>
+                    <p><strong>{deliveryMethod === 'pickup' ? 'Location' : 'Method'}:</strong> {deliveryMethod === 'pickup' ? 'Walmart Estero' : 'Home Delivery'}</p>
                   </div>
                 </div>
 
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                )}
+
                 <button
                   onClick={handlePlaceOrder}
-                  disabled={loading}
+                  disabled={loading || !selectedTimeSlot}
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
                 >
                   <CreditCard className="h-5 w-5" />

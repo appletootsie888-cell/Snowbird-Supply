@@ -16,6 +16,19 @@ export interface ArrivalPlan {
   createdAt?: string;
 }
 
+export interface SupabaseOrderInsert {
+  user_id: string;
+  packages: {
+    packageId: string;
+    name: string;
+    price: number;
+    quantity: number;
+  }[];
+  delivery_type: 'pickup' | 'delivery';
+  time_slot: string;
+  total_amount: number;
+  status: 'pending' | 'confirmed' | 'completed';
+}
 export interface PackageItem {
   id: string;
   name: string;

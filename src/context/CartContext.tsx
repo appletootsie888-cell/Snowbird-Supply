@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useState } from 'react';
-import { CartItem, Package } from '../types';
+import { CartItem, Package, TimeSlot } from '../types';
 
 interface CartContextType {
   items: CartItem[];
+  deliveryMethod: 'pickup' | 'delivery';
+  selectedTimeSlot: TimeSlot | null;
   addItem: (pkg: Package) => void;
   removeItem: (packageId: string) => void;
   updateQuantity: (packageId: string, quantity: number) => void;
+  setDeliveryMethod: (method: 'pickup' | 'delivery') => void;
+  setSelectedTimeSlot: (slot: TimeSlot | null) => void;
   clearCart: () => void;
   total: number;
   itemCount: number;
@@ -23,6 +27,8 @@ export const useCart = () => {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
 
   const addItem = (pkg: Package) => {
     setItems(prev => {
@@ -58,6 +64,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     setItems([]);
+    setDeliveryMethod('pickup');
+    setSelectedTimeSlot(null);
   };
 
   const total = items.reduce((sum, item) => sum + (item.package.price * item.quantity), 0);
@@ -65,9 +73,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     items,
+    deliveryMethod,
+    selectedTimeSlot,
     addItem,
     removeItem,
     updateQuantity,
+    setDeliveryMethod,
+    setSelectedTimeSlot,
     clearCart,
     total,
     itemCount

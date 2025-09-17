@@ -6,9 +6,7 @@ import { TimeSlot } from '../types';
 import { useCart } from '../context/CartContext';
 
 const SchedulerPage = () => {
-  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
-  const { itemCount } = useCart();
+  const { itemCount, deliveryMethod, selectedTimeSlot, setDeliveryMethod, setSelectedTimeSlot } = useCart();
   const navigate = useNavigate();
 
   // Mock time slots - in a real app, these would come from an API
@@ -34,7 +32,6 @@ const SchedulerPage = () => {
 
   const handleContinue = () => {
     if (selectedTimeSlot) {
-      // In a real app, you'd save the scheduling choice to context or state
       navigate('/checkout');
     }
   };
