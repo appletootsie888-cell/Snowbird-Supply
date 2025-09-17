@@ -22,7 +22,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               {/* Placeholder Logo */}
-              <img src="/vite.svg" alt="Snowbird Supply & Sync Logo" className="h-8 w-8" />
+              <img src="/favicon.ico" alt="Snowbird Supply & Sync Logo" className="h-8 w-8" />
               <span className="font-bold text-xl text-gray-900">
                 Snowbird Supply & Sync
               </span>
