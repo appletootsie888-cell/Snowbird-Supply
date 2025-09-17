@@ -23,7 +23,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 ease-in-out">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
@@ -40,7 +40,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
 
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors mb-4"
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors duration-200 mb-4"
         >
           <span className="text-sm font-medium">
             {expanded ? 'Hide' : 'View'} package contents
@@ -72,16 +72,16 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
           {quantity === 0 ? (
             <button
               onClick={handleAddToCart}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 ease-in-out hover:scale-103 active:scale-97 flex items-center justify-center space-x-2"
             >
               <ShoppingCart className="h-5 w-5" />
               <span>Add to Cart</span>
             </button>
           ) : (
-            <div className="flex-1 flex items-center justify-between bg-gray-50 rounded-lg p-2">
+            <div className="flex-1 flex items-center justify-between bg-gray-50 rounded-lg p-2 transition-all duration-200 ease-in-out">
               <button
                 onClick={() => handleUpdateQuantity(quantity - 1)}
-                className="w-10 h-10 bg-white hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
+                className="w-10 h-10 bg-white hover:bg-gray-100 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
               >
                 <Minus className="h-4 w-4 text-gray-600" />
               </button>
@@ -91,7 +91,7 @@ const PackageCard: React.FC<PackageCardProps> = ({ package: pkg }) => {
               </div>
               <button
                 onClick={() => handleUpdateQuantity(quantity + 1)}
-                className="w-10 h-10 bg-white hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
+                className="w-10 h-10 bg-white hover:bg-gray-100 rounded-lg flex items-center justify-center transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
               >
                 <Plus className="h-4 w-4 text-gray-600" />
               </button>
