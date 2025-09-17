@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   isReturningSnowbird?: boolean;
+  arrivalPlan?: ArrivalPlan; // Added for preloading
 }
 
 export interface ArrivalPlan {
