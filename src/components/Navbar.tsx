@@ -11,15 +11,18 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Get user initials for avatar
+  const userInitials = user?.email ? user.email.charAt(0).toUpperCase() : '';
+  const userName = user?.email ? user.email.split('@')[0] : 'Guest';
+
   return (
     <nav className="bg-white shadow-md border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SS</span>
-              </div>
+              {/* Placeholder Logo */}
+              <img src="/vite.svg" alt="Snowbird Supply & Sync Logo" className="h-8 w-8" />
               <span className="font-bold text-xl text-gray-900">
                 Snowbird Supply & Sync
               </span>
@@ -60,8 +63,11 @@ const Navbar = () => {
               </Link>
 
               <div className="flex items-center space-x-2">
-                <User className="h-5 w-5 text-gray-600" />
-                <span className="text-sm text-gray-700">{user.email}</span>
+                {/* User Avatar/Initials Bubble */}
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+                  {userInitials}
+                </div>
+                <span className="text-sm text-gray-700 hidden sm:inline">{userName}</span>
                 <button
                   onClick={logout}
                   className="p-1 text-gray-600 hover:text-red-600 transition-colors"
