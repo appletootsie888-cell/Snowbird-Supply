@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase, signIn, signUp, signOut } from '../lib/supabase';
-import { User } from '../types';
+import { User, ArrivalPlan } from '../types'; // Import ArrivalPlan
 
 interface AuthContextType {
   user: User | null;
@@ -25,15 +25,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserData = async (supabaseUser: SupabaseUser) => {
+    const { data: arrivalPlanData, error: arrivalPlanError } = await supabase
+      .from('arrival_plans')
+      .select('*')
+      .eq('user_id', supabaseUser.id)
+      .single();
+
+    if (arrivalPlanError && arrivalPlanError.code !== 'PGRST116') { // PGRST116 means "no rows found"
+      console.error('Error fetching arrival plan:', arrivalPlanError);
+    }
+
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email!,
+      isReturningSnowbird: supabaseUser.user_metadata?.isReturningSnowbird,
+      arrivalPlan: arrivalPlanData as ArrivalPlan | undefined // Cast to ArrivalPlan
+    };
+  };
+
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          isReturningSnowbird: session.user.user_metadata?.isReturningSnowbird
-        });
+        const userData = await fetchUserData(session.user);
+        setUser(userData);
       }
       setLoading(false);
     });
@@ -42,11 +58,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email!,
-            isReturningSnowbird: session.user.user_metadata?.isReturningSnowbird
-          });
+          const userData = await fetchUserData(session.user);
+          setUser(userData);
         } else {
           setUser(null);
         }
