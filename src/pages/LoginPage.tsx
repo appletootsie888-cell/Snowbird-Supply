@@ -45,7 +45,7 @@ const LoginPage = () => {
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-6">
             {/* Placeholder Logo */}
-            <img src="/favicon.ico" alt="Snowbird Supply & Sync Logo" className="h-12 w-12" />
+            <img src="/vite.svg" alt="Snowbird Supply & Sync Logo" className="h-12 w-12" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Snowbird Supply</h1>
               <p className="text-blue-600 font-medium">& Sync</p>
