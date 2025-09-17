@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Minus, Plus, Trash2, CreditCard } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
+import { ShoppingCart, Minus, Plus, Trash2, CreditCard, Edit } from 'lucide-react'; // Import Edit icon
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { SupabaseOrderInsert } from '../types';
+import toast from 'react-hot-toast'; // Import toast
+import SkeletonLoader from '../components/SkeletonLoader'; // Import SkeletonLoader
 
 const CheckoutPage = () => {
   const [loading, setLoading] = useState(false);
@@ -14,11 +16,15 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
 
   const deliveryFee = deliveryMethod === 'delivery' ? 9.99 : 0;
-  const tax = total * 0.07; // 7% tax
+  const taxRate = 0.07; // 7% tax
+  const tax = total * taxRate;
   const finalTotal = total + deliveryFee + tax;
 
   const handlePlaceOrder = async () => {
-    if (!user || items.length === 0 || !selectedTimeSlot) return;
+    if (!user || items.length === 0 || !selectedTimeSlot) {
+      toast.error('Please ensure your cart is not empty and a time slot is selected.');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -50,14 +56,15 @@ const CheckoutPage = () => {
         throw insertError;
       }
       
-      // Clear cart and navigate to success
+      toast.success('Order placed successfully!');
       clearCart();
       navigate('/success', { 
         state: { orderId: data.id }
       });
-    } catch (error) {
-      console.error('Error placing order:', error);
-      setError('Failed to place order. Please try again.');
+    } catch (err: any) {
+      console.error('Error placing order:', err);
+      setError(err.message || 'Failed to place order. Please try again.');
+      toast.error(err.message || 'Failed to place order.');
     } finally {
       setLoading(false);
     }
@@ -97,7 +104,7 @@ const CheckoutPage = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Items</h2>
             
             {items.map(item => (
-              <div key={item.packageId} className="bg-white rounded-lg border border-gray-200 p-6">
+              <div key={item.packageId} className="bg-white rounded-lg border border-gray-200 p-6 transition-all duration-300 ease-in-out"> {/* Added transition */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4">
                     <div className="text-2xl">{item.package.icon}</div>
@@ -151,22 +158,22 @@ const CheckoutPage = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
               
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium">${total.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-gray-600">
                     {deliveryMethod === 'delivery' ? 'Delivery Fee' : 'Pickup Fee'}
                   </span>
                   <span className="font-medium">${deliveryFee.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Tax ({taxRate * 100}%)</span>
                   <span className="font-medium">${tax.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-200 pt-3">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-gray-900">Total</span>
                     <span className="text-lg font-bold text-blue-600">${finalTotal.toFixed(2)}</span>
                   </div>
@@ -175,14 +182,35 @@ const CheckoutPage = () => {
 
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h3 className="font-semibold text-blue-900 mb-2">
-                    {deliveryMethod === 'pickup' ? 'Pickup Details' : 'Delivery Details'}
-                  </h3>
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-blue-900">
+                      {deliveryMethod === 'pickup' ? 'Pickup Details' : 'Delivery Details'}
+                    </h3>
+                    <Link to="/scheduler" className="text-blue-600 hover:text-blue-700 text-sm flex items-center space-x-1">
+                      <Edit className="h-4 w-4" />
+                      <span>Edit</span>
+                    </Link>
+                  </div>
                   <div className="text-sm text-blue-800 space-y-1">
                     <p><strong>Date:</strong> {selectedTimeSlot?.date || 'Not selected'}</p>
                     <p><strong>Time:</strong> {selectedTimeSlot?.time || 'Not selected'}</p>
                     <p><strong>{deliveryMethod === 'pickup' ? 'Location' : 'Method'}:</strong> {deliveryMethod === 'pickup' ? 'Walmart Estero' : 'Home Delivery'}</p>
                   </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold text-blue-900">
+                      Package Selection
+                    </h3>
+                    <Link to="/packages" className="text-blue-600 hover:text-blue-700 text-sm flex items-center space-x-1">
+                      <Edit className="h-4 w-4" />
+                      <span>Edit</span>
+                    </Link>
+                  </div>
+                  <p className="text-sm text-blue-800">
+                    You have {items.length} unique package(s) selected.
+                  </p>
                 </div>
 
                 {error && (
@@ -191,18 +219,24 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
-                <button
-                  onClick={handlePlaceOrder}
-                  disabled={loading || !selectedTimeSlot}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                >
-                  <CreditCard className="h-5 w-5" />
-                  <span>
-                    {loading ? 'Processing...' : 'Confirm My Arrival Order'}
-                  </span>
-                </button>
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-lg z-50 lg:static lg:p-0 lg:bg-transparent lg:shadow-none lg:z-auto">
+                  {loading ? (
+                    <SkeletonLoader type="text" className="w-full h-12" />
+                  ) : (
+                    <button
+                      onClick={handlePlaceOrder}
+                      disabled={!selectedTimeSlot || items.length === 0}
+                      className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <CreditCard className="h-5 w-5" />
+                      <span>
+                        Confirm My Arrival Order
+                      </span>
+                    </button>
+                  )}
+                </div>
 
-                <p className="text-xs text-gray-500 text-center">
+                <p className="text-xs text-gray-500 text-center mt-2">
                   This is a demo - no payment will be processed
                 </p>
               </div>
