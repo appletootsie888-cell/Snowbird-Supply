@@ -1,11 +1,14 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, Phone, ArrowRight } from 'lucide-react';
+import Confetti from 'react-confetti'; // Import Confetti
+import { useWindowSize } from 'react-use'; // Optional: for dynamic confetti size
 
 const SuccessPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const orderId = location.state?.orderId || 'ORD-123456';
+  const { width, height } = useWindowSize(); // For confetti dimensions
 
   const handleStartOver = () => {
     navigate('/packages');
@@ -13,6 +16,13 @@ const SuccessPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
+      <Confetti
+        width={width}
+        height={height}
+        recycle={false} // Confetti runs once
+        numberOfPieces={200}
+        tweenDuration={5000}
+      />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
