@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ArrivalPlan } from '../types';
+import toast from 'react-hot-toast'; // Import toast
+import SkeletonLoader from '../components/SkeletonLoader'; // Import SkeletonLoader
 
 const ArrivalPlannerPage = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     arrivalDate: '',
     departureDate: '',
@@ -17,8 +20,20 @@ const ArrivalPlannerPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.arrivalPlan) {
+      setFormData({
+        arrivalDate: user.arrivalPlan.arrivalDate,
+        departureDate: user.arrivalPlan.departureDate,
+        address: user.arrivalPlan.address,
+        city: user.arrivalPlan.city,
+        state: user.arrivalPlan.state,
+        zipCode: user.arrivalPlan.zipCode
+      });
+    }
+  }, [user?.arrivalPlan]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -29,7 +44,10 @@ const ArrivalPlannerPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      toast.error('You must be logged in to save an arrival plan.');
+      return;
+    }
 
     setLoading(true);
     setError('');
@@ -45,7 +63,7 @@ const ArrivalPlannerPage = () => {
         zipCode: formData.zipCode
       };
 
-      const { error } = await supabase
+      const { error: upsertError } = await supabase
         .from('arrival_plans')
         .upsert({
           user_id: arrivalPlan.userId,
@@ -55,15 +73,17 @@ const ArrivalPlannerPage = () => {
           city: arrivalPlan.city,
           state: arrivalPlan.state,
           zip_code: arrivalPlan.zipCode
-        }, { onConflict: 'user_id' });
+        }, { onConflict: 'user_id' }); // Use onConflict to update if plan already exists
 
-      if (error) {
-        setError(error.message);
-      } else {
-        navigate('/packages');
+      if (upsertError) {
+        throw upsertError;
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
+      toast.success('Arrival plan saved successfully!');
+      navigate('/packages');
+    } catch (err: any) {
+      console.error('Error saving arrival plan:', err);
+      setError(err.message || 'An unexpected error occurred while saving your plan.');
+      toast.error(err.message || 'Failed to save arrival plan.');
     } finally {
       setLoading(false);
     }
@@ -190,14 +210,20 @@ const ArrivalPlannerPage = () => {
               </ul>
             </div>
 
-            <button
-              type="submit"
-              disabled={!isFormValid || loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-            >
-              <span>{loading ? 'Saving...' : 'Continue to Packages'}</span>
-              <ArrowRight className="h-5 w-5" />
-            </button>
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-lg z-50 lg:static lg:p-0 lg:bg-transparent lg:shadow-none lg:z-auto">
+              {loading ? (
+                <SkeletonLoader type="text" className="w-full h-12" />
+              ) : (
+                <button
+                  type="submit"
+                  disabled={!isFormValid}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
+                  <span>Continue to Packages</span>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              )}
+            </div>
           </form>
         </div>
       </div>
