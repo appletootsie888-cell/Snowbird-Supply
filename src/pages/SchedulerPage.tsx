@@ -43,11 +43,11 @@ const SchedulerPage = () => {
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Clock className="h-8 w-8 text-gray-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No items in cart</h2>
-          <p className="text-gray-600 mb-6">Add some packages first before scheduling.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty!</h2>
+          <p className="text-gray-600 mb-6">Add some packages first before scheduling your pickup or delivery.</p>
           <button
             onClick={() => navigate('/packages')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 ease-in-out hover:scale-103 active:scale-97"
           >
             Browse Packages
           </button>
@@ -81,7 +81,7 @@ const SchedulerPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <button
                 onClick={() => setDeliveryMethod('pickup')}
-                className={`p-6 rounded-xl border-2 transition-all text-left ${
+                className={`p-6 rounded-xl border-2 transition-all duration-200 ease-in-out hover:scale-103 active:scale-97 ${
                   deliveryMethod === 'pickup'
                     ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600'
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -105,7 +105,7 @@ const SchedulerPage = () => {
 
               <button
                 onClick={() => setDeliveryMethod('delivery')}
-                className={`p-6 rounded-xl border-2 transition-all text-left ${
+                className={`p-6 rounded-xl border-2 transition-all duration-200 ease-in-out hover:scale-103 active:scale-97 ${
                   deliveryMethod === 'delivery'
                     ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600'
                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -163,14 +163,16 @@ const SchedulerPage = () => {
           )}
 
           {/* Continue Button */}
-          <button
-            onClick={handleContinue}
-            disabled={!selectedTimeSlot}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-4 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-          >
-            <span>Continue to Checkout</span>
-            <ArrowRight className="h-5 w-5" />
-          </button>
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-lg z-50 lg:static lg:p-0 lg:bg-transparent lg:shadow-none lg:z-auto">
+            <button
+              onClick={handleContinue}
+              disabled={!selectedTimeSlot}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-medium py-4 px-6 rounded-lg transition-all duration-200 ease-in-out hover:scale-103 active:scale-97 flex items-center justify-center space-x-2"
+            >
+              <span>Continue to Checkout</span>
+              <ArrowRight className="h-5 w-5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
